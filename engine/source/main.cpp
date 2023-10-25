@@ -72,6 +72,7 @@ int main()
     default:
         break;
     }
+    
     world.BuildBVH();
 
     /* Make the window's context current */
@@ -79,7 +80,7 @@ int main()
     gladLoadGL(); // NOTE: we need load openGL here
     /* Loop until the user closes the window */
 
-    auto renderTex = camera.Render(world, 100);
+    auto renderTex = camera.Render(world, 4);
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
@@ -313,7 +314,7 @@ void cornell_smoke(RayTracer::Camera &cam, RayTracer::Scene &world)
     world.add(make_shared<Quad>(Vector3(0.0f, 0.0f, -555.0f), Vector3(555.0f, 0.0f, 0.0f), Vector3(0.0f, 555.0f, 0.0f), white));
 
     //lights
-    world.add(make_shared<Quad>(Vector3(343.0f, 554.0f, -332.0f), Vector3(-130.0f, 0.0f, 0.0f), Vector3(0.0f, 0.0f, 105.0f), light));
+    world.add(make_shared<Quad>(Vector3(343.0f, 554.0f, -332.0f), Vector3(0.0f, 0.0f, 105.0f), Vector3(-130.0f, 0.0f, 0.0f), light));
 
     // box
     std::shared_ptr<RayTracer::Hittable> box1 = make_shared<Box>(Vector3(0.0f, 0.0f, 0.0f), Vector3(165.0f, 165.0f, 165.0f), white);
@@ -434,10 +435,10 @@ void cornell_box_sphere(RayTracer::Camera &cam, RayTracer::Scene &world)
     auto glass = make_shared<Sphere>(Vector3(190.0f,90.0f, -190.0f), 90.0f, Glass);
     world.add(glass);
 
-    // std::shared_ptr<RayTracer::Hittable> box2 = make_shared<Box>(Vector3(0.0f, 0.0f, 0.0f), Vector3(165.0f, 330.0f, 165.0f), white);
-    // box2 = Translation::Translate(Rotation::Rotate(box2, Vector3(0.0f, -15.0f, 0.0f)), Vector3(265.0f+82.5f, 165.0f, -295.0f-82.5f));
-    // world.add(box2);
-
+    std::shared_ptr<RayTracer::Hittable> box2 = make_shared<Box>(Vector3(0.0f, 0.0f, 0.0f), Vector3(165.0f, 330.0f, 165.0f), white);
+    box2 = Translation::Translate(Rotation::Rotate(box2, Vector3(0.0f, -15.0f, 0.0f)), Vector3(265.0f+82.5f, 165.0f, -295.0f-82.5f));
+    world.add(box2);
+    
     Lights::lights->add(glass);
     Lights::lights->add(_light);
     Lights::lights->BuildBVH();

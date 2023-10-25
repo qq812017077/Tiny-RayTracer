@@ -104,7 +104,18 @@ namespace RayTracer
         if(scatter.skip_pdf) 
             return emitted + scatter.albedo * ray_color(scatter.scatter_ray, world, --depth);
         
-        MixturePdf mixed_pdf(std::make_shared<HittablePdf>(Lights::lights, result.hit_point), scatter.pdf);
+        if(Lights::lights->objects.size() > 0)
+        {
+            MixturePdf mixed_pdf(std::make_shared<HittablePdf>(Lights::lights, result.hit_point), scatter.pdf);
+            scatteredRay = Ray(result.hit_point, mixed_pdf.generate());     //get a random ray to the light                
+            pdf = mixed_pdf.Value(scatteredRay.direction());  //get the pdf of the ray
+        }else
+        {
+            scatteredRay = Ray(result.hit_point, scatter.pdf->generate());     //get a random ray to the light                
+            pdf = scatter.pdf->Value(scatteredRay.direction());  //get the pdf of the ray
+        }
+        if(pdf < kEpsilon)
+                return emitted;
         
         // very hard coded light source
         // auto on_light = Vector3(random_float(213.0f , 343.0f ), 554.0f , random_float(-332.0f, -227.0f));
@@ -121,10 +132,7 @@ namespace RayTracer
         // float pdf = distance_squared / (light_cosine * areaSize);
         // auto scatteredRay = Ray(result.hit_point, to_light);
 
-        scatteredRay = Ray(result.hit_point, mixed_pdf.generate());     //get a random ray to the light                
-        pdf = mixed_pdf.Value(scatteredRay.direction());  //get the pdf of the ray
-        if(pdf < kEpsilon) 
-            return emitted;
+        
 
         float brdf = result.hit_material->ScatteringPDF(r, result, scatteredRay);
         Vector3 Lin = ray_color(scatteredRay, world, --depth);
