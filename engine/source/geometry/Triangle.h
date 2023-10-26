@@ -27,7 +27,8 @@ namespace RayTracer
 
             auto min = Vector3::Min(v0, Vector3::Min(v1, v2));
             auto max = Vector3::Max(v0, Vector3::Max(v1, v2));
-            bounds = Bounds(min, max - min);
+            bounds = Bounds();
+            bounds.SetMinMax(min, max);
             bounds.Padding();
         }
 
@@ -79,9 +80,9 @@ namespace RayTracer
             auto v1p = p - v1;
             auto v2p = p - v2;
 
-            auto c0 = e1.crossProduct(v0p);
-            auto c1 = e2.crossProduct(v1p);
-            auto c2 = e1.crossProduct(v2p);
+            auto c0 = v0p.crossProduct(v1p);
+            auto c1 = v1p.crossProduct(v2p);
+            auto c2 = v2p.crossProduct(v0p);
 
             return (c0.dot(c1) >= 0.0f) && (c1.dot(c2) >= 0.0f);
         }

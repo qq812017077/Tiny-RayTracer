@@ -20,6 +20,7 @@ namespace RayTracer
                 scatter.mat_type = MaterialType::Lambert;
                 scatter.skip_pdf = false;
                 scatter.pdf = std::make_shared<CosinePdf>(hit.normal);
+                // scatter.scatter_ray = Ray(hit.hit_point, Vector3::RandomOnHemisphere(hit.normal));
                 return true;
             }
 

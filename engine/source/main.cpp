@@ -35,6 +35,8 @@ void cornell_box(RayTracer::Camera &cam, RayTracer::Scene &world);
 void cornell_smoke(RayTracer::Camera &cam, RayTracer::Scene &world);
 void final_scene(RayTracer::Camera &cam, RayTracer::Scene &world);
 void cornell_box_sphere(RayTracer::Camera &cam, RayTracer::Scene &world);
+void triangle(RayTracer::Camera &cam, RayTracer::Scene &world);
+void mesh(RayTracer::Camera &cam, RayTracer::Scene &world);
 int main()
 {
     GLFWwindow *window;
@@ -57,7 +59,7 @@ int main()
     RayTracer::Camera camera(width, height);
 
     RayTracer::Scene world;
-    switch (10)
+    switch (12)
     {
     case 1: get_random_sphere_world(camera, world); break;
     case 2: get_two_sphere_world(camera, world); break;
@@ -69,6 +71,8 @@ int main()
     case 8: cornell_smoke(camera, world); break;
     case 9: final_scene(camera, world); break;
     case 10: cornell_box_sphere(camera, world); break;
+    case 11: triangle(camera, world); break;
+    case 12: mesh(camera, world); break;
     default:
         break;
     }
@@ -80,7 +84,7 @@ int main()
     gladLoadGL(); // NOTE: we need load openGL here
     /* Loop until the user closes the window */
 
-    auto renderTex = camera.Render(world, 4);
+    auto renderTex = camera.Render(world, 64);
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
@@ -246,7 +250,7 @@ void simple_light(RayTracer::Camera &cam, RayTracer::Scene &world)
     world.add(make_shared<Sphere>(Vector3(0.0f, 2.0f, 0.0f), 2.0f, make_shared<Lambert>(pertext)));
 
     auto difflight = make_shared<DiffuseLight>(Vector3(4.0f, 4.0f, 4.0f));
-    world.add(make_shared<Quad>(Vector3(3.0f, 1.0f, 2.0f), Vector3(2.0f, 0.0f, 0.0f), Vector3(0.0f, 2.0f, 0.0f), difflight));
+    world.add(make_shared<Quad>(Vector3(3.0f, 1.0f, 2.0f), Vector3(0.0f, 2.0f, 0.0f), Vector3(2.0f, 0.0f, 0.0f), difflight));
 }
 
 
@@ -442,4 +446,68 @@ void cornell_box_sphere(RayTracer::Camera &cam, RayTracer::Scene &world)
     Lights::lights->add(glass);
     Lights::lights->add(_light);
     Lights::lights->BuildBVH();
+}
+
+
+void triangle(RayTracer::Camera &cam, RayTracer::Scene &world)
+{
+    using namespace std;
+    using namespace RayTracer;
+
+    cam.SetPos(Vector3(0.0f, 0.0f, -9.0f));
+    cam.SetLookAt(Vector3(0.0f, 0.0f, 0.0f));
+    cam.SetFov(80.0f);
+    cam.defocus_angle = 0.0f;
+    auto left_red = make_shared<Lambert>(Vector3(1.0f, 0.2f, 0.2f));
+    auto back_green = make_shared<Lambert>(Vector3(0.2f, 1.0f, 0.2f));
+    auto right_blue = make_shared<Lambert>(Vector3(0.2f, 0.2f, 1.0f));
+    auto upper_orange = make_shared<Lambert>(Vector3(1.0f, 0.5f, 0.0f));
+    auto lower_teal = make_shared<Lambert>(Vector3(0.2f, 0.8f, 0.8f));
+
+    //left
+    world.add(make_shared<Triangle>(Vector3(-3.f, 2.f, -1.f), Vector3(-3.f, 2.f, -5.f), Vector3(-3.f, -2.f, -5.f), left_red));
+    world.add(make_shared<Triangle>(Vector3(-3.f, 2.f, -1.f), Vector3(-3.f, -2.f, -1.f), Vector3(-3.f, -2.f, -5.f), back_green));
+    
+    world.add(make_shared<Triangle>(Vector3(-2.f, -2.f, 0.f), Vector3(2.f, -2.f, 0.f), Vector3(-2.f, 2.f, 0.f), back_green));
+    world.add(make_shared<Triangle>(Vector3(2.f, 2.f, 0.f), Vector3(2.f, -2.f, 0.f), Vector3(-2.f, 2.f, 0.f), right_blue));
+
+    world.add(make_shared<Triangle>(Vector3(3.f, 2.f, -1.f), Vector3(3.f, 2.f, -5.f), Vector3(3.f, -2.f, -5.f), right_blue));
+    world.add(make_shared<Triangle>(Vector3(3.f, 2.f, -1.f), Vector3(3.f, -2.f, -1.f), Vector3(3.f, -2.f, -5.f), lower_teal));
+
+    world.add(make_shared<Triangle>(Vector3(-2.f, 3.f, -5.f), Vector3(2.f, 3.f, -1.f), Vector3(2.f, 3.f, -5.f), upper_orange));
+    world.add(make_shared<Triangle>(Vector3(-2.f, 3.f, -5.f), Vector3(2.f, 3.f, -1.f), Vector3(-2.f, 3.f, -1.f), left_red));
+
+    world.add(make_shared<Triangle>(Vector3(-2.f, -3.f, -5.f), Vector3(2.f, -3.f, -1.f), Vector3(-2.f, -3.f, -1.f), lower_teal));
+    world.add(make_shared<Triangle>(Vector3(-2.f, -3.f, -5.f), Vector3(2.f, -3.f, -1.f), Vector3(2.f, -3.f, -5.f), upper_orange));
+
+}
+
+void mesh(RayTracer::Camera &cam, RayTracer::Scene &world)
+{
+    using namespace std;
+    using namespace RayTracer;
+
+    cam.SetPos(Vector3(0.0f, 8.0f,  10.0f));
+    cam.SetLookAt(Vector3(0.0f, 0.0f, 0.0f));
+    cam.SetFov(90.0f);
+    cam.defocus_angle = 0.0f;
+
+    auto checker = std::make_shared<TexChecker>(0.3f, Vector3(0.2f, 0.3f, 0.1f), Vector3(0.9f, 0.8f, 0.9f));
+    auto material_ground = std::make_shared<RayTracer::Lambert>(checker);
+
+
+
+    auto diffuse = make_shared<Lambert>(Vector3(0.8f, 0.8f, 0.8f));
+    auto isotropic = make_shared<Isotropic>(Vector3(0.8f, 0.8f, 0.8f));
+    auto dielectric = make_shared<Dielectric>(0.8f);
+    auto metal = make_shared<Metal>(Vector3(0.8f, 0.8f, 0.8f), 0.01f);
+
+    auto mesh = make_shared<MeshTriangle>("asset/models/bunny/bunny.obj", diffuse);
+    world.add(Translation::Translate(mesh, Vector3(1.0f, -2.0f, 0.0f)));
+    // world.add(mesh);
+    // auto sphere = ;
+    
+    // world.add(make_shared<Sphere>(Vector3(0.0f, 3.0f, 0.0f), 3.0f, metal));
+    auto ground = make_shared<Sphere>(Vector3(0.0f, -1000.0f, 0.0f), 1000.0f, material_ground);
+    world.add(ground);
 }

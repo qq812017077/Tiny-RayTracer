@@ -4,6 +4,7 @@
 #include "mathlib.h"
 #include "util/MeshLoader.h"
 #include "Triangle.h"
+#include <string>
 
 
 namespace RayTracer
@@ -11,10 +12,14 @@ namespace RayTracer
     class MeshTriangle : public Scene
     {
     public:
-        MeshTriangle(std::string fileName, Vector3 pos, std::shared_ptr<Material> m)
+        MeshTriangle(std::string filename, std::shared_ptr<Material> m)
+        :MeshTriangle(filename, Vector3::zero, m)
+        {
+        }
+        MeshTriangle(std::string filename, Vector3 pos, std::shared_ptr<Material> m)
         {
             Loader loader;
-            loader.LoadFile(fileName);
+            loader.LoadFile(filename);
 
             assert(loader.LoadedMeshes.size() == 1);
             auto mesh = loader.LoadedMeshes[0];
